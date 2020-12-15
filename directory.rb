@@ -26,6 +26,7 @@ def input_students
   while !name.empty? do
     #add the student hash to array
     students << {name: name, cohort: :november}
+    puts "Now we have #{students.count} students"
     # get another name from user
     name = gets.chomp
   end
@@ -33,7 +34,6 @@ def input_students
   students
 end
 
-# and then print
 def print_header
   puts "The students of Villains Academy"
   puts "-------------"
@@ -44,7 +44,7 @@ def print(students)
     puts "#{student[:name]} (#{student[:cohort]} cohort)"
   end
 end
-# finally, we print the total number of students
+
 def print_footer(names)
   puts "Overall, we have #{names.count} great students"
 end
