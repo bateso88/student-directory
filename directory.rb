@@ -16,6 +16,7 @@ def print_menu
 end
 
 def process(selection)
+  feedback_message(selection)
   case selection
   when "1"
     input_students
@@ -30,6 +31,10 @@ def process(selection)
   else
     puts "I don't know what you meant, try again"
   end
+end
+
+def feedback_message(number)
+  puts "You pressed #{number}"
 end
 
 def input_students
@@ -82,7 +87,7 @@ def load_students(filename = "students.csv")
   file.close
 end
 
-def try_load_students
+def load_file
   filename = ARGV.first
   if filename.nil?
     load_students
@@ -107,5 +112,7 @@ def message_confirming_load(filename = "students.csv")
 end
 
 
-try_load_students
+
+
+load_file
 interactive_menu
