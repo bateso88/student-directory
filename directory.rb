@@ -1,4 +1,5 @@
 @students = [] # an empty array accessible to all methods
+@list_of_saves = []
 
 def interactive_menu
   loop do
@@ -10,8 +11,8 @@ end
 def print_menu
   puts "1. Input the students"
   puts "2. Show the students"
-  puts "3. Save the list to students.csv"
-  puts "4. Load the list from students.csv"
+  puts "3. Save list"
+  puts "4. Load list"
   puts "9. Exit"
 end
 
@@ -23,10 +24,11 @@ def process(selection)
   when "2"
     show_students
   when "3"
-    save_students
+    select_save_file
   when "4"
-    load_students
+    select_load_file
   when "9"
+    update_git_ignore
     exit # this will cause the program to terminate
   else
     puts "I don't know what you meant, try again"
@@ -47,6 +49,10 @@ def input_students
     # get another name from the user
     name = STDIN.gets.chomp
   end
+end
+
+def add_student(name,cohort = :november)
+  @students << {name: name, cohort: cohort.to_sym}
 end
 
 def show_students
@@ -70,12 +76,26 @@ def print_footer
   puts "Overall, we have #{@students.count} great students"
 end
 
-def save_students
-  file = File.open("students.csv", "w")
+def select_save_file
+  puts "File name (hit return for default): "
+  filename = STDIN.gets.chomp
+  filename == '' ? save_students : save_students(filename)
+end
+
+def save_students(filename = "students.csv")
+  @list_of_saves << filename if !File.exists?(filename)
+  file = File.open(filename, "w")
   @students.each do |student|
     file.puts [student[:name], student[:cohort]].join(",")
   end
   file.close
+  puts "Saved to #{filename}"
+end
+
+def select_load_file
+  puts "File name (hit return for default): "
+  filename = STDIN.gets.chomp
+  filename == '' ? load_students : load_students(filename)
 end
 
 def load_students(filename = "students.csv")
@@ -85,34 +105,45 @@ def load_students(filename = "students.csv")
     add_student(name,cohort)
   end
   file.close
+  message_confirming_load(filename)
 end
 
 def load_file
   filename = ARGV.first
   if filename.nil?
     load_students
-    message_confirming_load
     return
   end
   if File.exists?(filename)
     load_students(filename)
-    message_confirming_load(filename)
   else
     puts "Sorry, #{filename} doesn't exist."
     exit
   end
 end
 
-def add_student(name,cohort = :november)
-  @students << {name: name, cohort: cohort.to_sym}
-end
-
 def message_confirming_load(filename = "students.csv")
-  puts "Loaded #{@students.count} from #{filename}"
+  puts "Loaded students from #{filename}. There are now #{@students.count} students."
 end
 
+def load_saves
+  file = File.open(".gitignore","r")
+  file.readlines.each do |line|
+    save_name = line.chomp
+    @list_of_saves << save_name
+  end
+  file.close
+end
 
+def update_git_ignore
+  file = File.open(".gitignore", "w")
+  @list_of_saves.each do |save|
+    file.puts save
+  end
+  file.close
+  puts "'.gitignore' updated"
+end
 
-
+load_saves
 load_file
 interactive_menu
