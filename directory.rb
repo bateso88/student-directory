@@ -84,11 +84,11 @@ end
 
 def save_students(filename = "students.csv")
   @list_of_saves << filename if !File.exists?(filename)
-  file = File.open(filename, "w")
-  @students.each do |student|
-    file.puts [student[:name], student[:cohort]].join(",")
-  end
-  file.close
+  File.open(filename, "w") { |file|
+    @students.each do |student|
+      file.puts [student[:name], student[:cohort]].join(",")
+    end
+  }
   puts "Saved to #{filename}"
 end
 
@@ -99,14 +99,27 @@ def select_load_file
 end
 
 def load_students(filename = "students.csv")
-  file = File.open(filename,"r")
-  file.readlines.each do |line|
-    name, cohort = line.chomp.split(',')
-    add_student(name,cohort)
-  end
-  file.close
+  File.open(filename,"r") {|file|
+    file.readlines.each do |line|
+      name, cohort = line.chomp.split(',')
+      add_student(name,cohort)
+    end
+  }
   message_confirming_load(filename)
 end
+
+=begin
+# Trying to use foreach method on file (see load_list_of_save_files below)
+# but struggling to get rid of end line characters from 'name' variable
+# the above load_students method works but this would be neater. Come back to.
+def load_students(filename = "students.csv")
+  File.foreach(filename, "r"){|line|
+    name, cohort = line.chomp.split(',')
+    add_student(name,cohort)
+  }
+  message_confirming_load(filename)
+end
+=end
 
 def load_file
   filename = ARGV.first
@@ -126,24 +139,22 @@ def message_confirming_load(filename = "students.csv")
   puts "Loaded students from #{filename}. There are now #{@students.count} students."
 end
 
-def load_saves
-  file = File.open(".gitignore","r")
-  file.readlines.each do |line|
+def load_list_of_save_files
+  File.foreach(".gitignore","r") {|line|
     save_name = line.chomp
     @list_of_saves << save_name
-  end
-  file.close
+  }
 end
 
 def update_git_ignore
-  file = File.open(".gitignore", "w")
-  @list_of_saves.each do |save|
-    file.puts save
-  end
-  file.close
+  File.open(".gitignore", "w") { |file|
+    @list_of_saves.each do |save|
+      file.puts save
+    end
+  }
   puts "'.gitignore' updated"
 end
 
-load_saves
+load_list_of_save_files
 load_file
 interactive_menu
